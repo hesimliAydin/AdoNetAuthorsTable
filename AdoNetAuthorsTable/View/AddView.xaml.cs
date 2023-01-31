@@ -31,7 +31,7 @@ namespace AdoNetAuthorsTable.View
 
         private void Btn_Cancel_Click(object sender, RoutedEventArgs e)
         {
-
+            DialogResult=false;
         }
     }
 }

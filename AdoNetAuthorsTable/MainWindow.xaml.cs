@@ -1,6 +1,7 @@
 ﻿using AdoNetAuthorsTable.Model;
 using AdoNetAuthorsTable.View;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -154,12 +155,12 @@ WHERE Authors.Id =@id";
 
                 var name = Category_Cbox.SelectedItem.ToString();
                 var query = @"SELECT *
-FROM Books 
-JOIN Categories
-ON Categories.Id=Id_Category
-JOIN Authors
-ON Authors.Id=Id_Authors
-WHERE Categories.Name=@name AND Id_Author=@id";
+FROM Books AS B
+JOIN Categories AS C
+ON C.Id=B.Id_Category
+JOIN Authors AS A
+ON A.Id=B.Id_Author
+WHERE C.[Name]=@name AND Id_Author=@id";
 
 
                 using (SqlCommand command=new SqlCommand(query,conn))
@@ -195,7 +196,7 @@ WHERE Categories.Name=@name AND Id_Author=@id";
         {
             if (e.Key==Key.Enter)
             {
-                
+                Btn_Search_Click(sender, e);
             }
         }
 
@@ -203,16 +204,101 @@ WHERE Categories.Name=@name AND Id_Author=@id";
 
         private void Btn_Add_Click(object sender, RoutedEventArgs e)
         {
-            
+            AddView addView = new AddView();
+            addView.ShowDialog();
         }
 
         private void Btn_Uptade_Click(object sender, RoutedEventArgs e)
         {
+            if (ListBooks.SelectedItem is null)
+            {
+                return;
+            }
+            var book = ListBooks.SelectedItem as Books;
 
+            if (book!=null)
+            {
+                UptadeView uptadeView = new UptadeView();
+                uptadeView.ShowDialog();
+            }
         }
 
         private void Btn_Delete_Click(object sender, RoutedEventArgs e)
         {
+            if (ListBooks.SelectedItems is null)
+            {
+                return;
+            }
+
+            using (SqlConnection conn=new SqlConnection())
+            {
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["connString"].ConnectionString;
+                conn.Open();
+
+                var id = (ListBooks.SelectedItem as Books)?.Id;
+                var query = "DELETE FROM Books WHERE Id =@id";
+
+
+                using (SqlCommand command=new SqlCommand(query,conn))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                }
+
+            }
+        }
+
+
+        private void Btn_Search_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(Txt_Search.Text))
+                return;
+
+            using (SqlConnection conn=new SqlConnection())
+            {
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["connString"].ConnectionString;
+                conn.Open();
+                var query = @"SELECT *
+FROM Books AS B
+WHERE (B.[Name] LIKE @text)"
+                ;
+
+
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    command.Parameters.AddWithValue("@text", "%" + Txt_Search.Text + "%");
+                    var reader=command.ExecuteReader();
+
+
+                    ListBooks.Items.Clear();
+
+                    while (reader.Read())
+                    {
+                        var bookId = reader["Id"] as int?;
+                        var bookName = reader["Name"] as string;
+                        var bookPages = reader["Pages"] as int?;
+                        var bookYearPress = reader["YearPress"] as int?;
+                        var IdAuthor = reader["Id_Author"] as int?;
+                        var IdTheme = reader["Id_Themes"] as int?;
+                        var IdCategory = reader["Id_Category"] as int?;
+                        var IdPress = reader["Id_Press"] as int?;
+                        var comment = reader["Comment"] as string;
+                        var quantity = reader["Quantity"] as int?;
+
+                        var book = new Books(bookId, bookName, bookPages, bookYearPress, IdAuthor, IdTheme, IdCategory, IdPress, comment, quantity);
+                        ListBooks.Items.Add(book);
+                    }
+
+                }
+
+
+            }
+
+            
+
+            
+
+
 
         }
     }

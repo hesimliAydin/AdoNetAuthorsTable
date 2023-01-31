@@ -54,7 +54,8 @@
 
             <Button
                 Grid.Column="3"
-                Margin="10">
+                Margin="10"
+                Click="Btn_Search_Click">
                 
             </Button>
             
