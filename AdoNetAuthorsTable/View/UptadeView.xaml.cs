@@ -36,7 +36,17 @@ namespace AdoNetAuthorsTable.View
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["connString"].ConnectionString;
                 conn.Open();
 
-                var query = $"UPDATE Books SET [Name] = '{Book?.Name}', Pages= {Book?.Pages}, YearPress = {Book?.YearPress},Id_Author = {Book?.IdAuthor}, Id_Themes = {Book?.IdTheme},Id_Category = {Book?.IdCategory},Id_Press = {Book?.IdPress},Comment = '{Book?.Comment}',Quantity = {Book?.Quantity} WHERE Id = {Book?.Id}";
+                var query = @"UPDATE Books
+SET [Name] = '{Book?.Name}',
+[Pages] = '{Book?.Pages}',
+[YearPress] = '{Book?.YearPress}',
+[Id_Author] = '{Book?.IdAuthor}',
+[Id_Themes] = '{Book?.IdTheme}',
+[Id_Category] = '{Book?.IdCategory}',
+[Id_Press] = '{Book?.IdPress}',
+[Comment] = '{Book?.Comment}',
+[Quantity] = '{Book?.Quantity}'
+WHERE [Id] = Books.Id";
 
                 using (SqlCommand command = new SqlCommand(query,conn))
                 {
